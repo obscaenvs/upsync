@@ -4,8 +4,14 @@ An [`fswatch`](https://github.com/emcrisostomo/fswatch)-based `bash`-script that
 in a directory with the correct credentials, watches the directory for
 changes and takes the specified upload action.
 
-# Version
-This version of `upsync` works with `fswatch-1.3.9` and `fswatch-1.4.0`, and since it doesn't use may features of it, probably somewhat older versions.
+# Version details
+
+This version of `upsync` works with `fswatch-1.3.9` and
+`fswatch-1.4.0`, and since it doesn't use may features of it, probably
+somewhat older versions. As of now, only tested on Mac OS X 10.8 and FreeBSD 10.0-RELEASE. 
+
+# Bugs
+Probably, being written in `bash`. Let me know. 
 
 # Example
 Given a directory 
