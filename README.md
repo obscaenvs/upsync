@@ -24,7 +24,9 @@ remote_machine:dev.example.com
 remote_directory:/tmp/watched_dir
 remote_method:rsync -vrP
 local_ignore: .git ignored_dir
-```, we launch the upsync command thusly 
+```
+we launch the upsync command thusly 
+
 ```
 $ upsync watched_dir
 ```
