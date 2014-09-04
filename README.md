@@ -17,7 +17,7 @@ Given a directory
 │   └── source_file_2.src
 └── source_file.src
 ```
-, and the contents of the .upsync file being
+and the contents of the .upsync file being
 ```
 remote_user:root
 remote_machine:dev.example.com
