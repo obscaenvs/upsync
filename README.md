@@ -12,13 +12,13 @@ Licensed under the ["Simplified BSD license"](https://en.wikipedia.org/wiki/BSD_
 This version of `upsync` works with `fswatch-1.3.9` and
 `fswatch-1.4.0`, and since it doesn't use may features of it, probably
 somewhat older versions. As of now, only tested on Mac OS X
-10.9.4, with GNU bash, version 4.3.11. Testing under way on FreeBSD 10.0-RELEASE.
+10.9.4, with GNU bash, version 4.3.11.
+Testing under way on FreeBSD 10.0-RELEASE.
 
-# Bugs
+# Known issues
 
 Sometimes it's slow to react to a change. I have yet to investigate
 why. I don't think it is the underlying program (i.e.`fswatch`)
-Probably more, being written in `bash`. Let me know.
 
 # Todo
   * Better error messages (e.g. when starting the script)
