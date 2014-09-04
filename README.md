@@ -2,7 +2,7 @@
 
 An [`fswatch`](https://github.com/emcrisostomo/fswatch)-based `bash`-script that, based on a dot file `.upsync`
 in a directory with the correct credentials, watches the directory for
-changes and takes the specified upload action.
+changes and takes the specified upload action. This script is immature and essentially just a configurable wrapper for `fswatch`.
 
 # Version details
 
