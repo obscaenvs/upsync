@@ -17,8 +17,12 @@ Sometimes it's slow to react to a change. I have yet to investigate
 why. I don't think it is the underlying program (i.e.`fswatch`)
 Probably more, being written in `bash`. Let me know.
 
+# Todo
+  * Better error messages (e.g. when starting the script)
+  * Document the script better (work in progress)
+
 # Example
-Given a directory 
+Let's say we have a directory 
 ```
 /tmp/watched_dir/
 ├── .git
@@ -30,7 +34,7 @@ Given a directory
 │   └── source_file_2.src
 └── source_file.src
 ```
-and the contents of the .upsync file being
+and the contents of the .upsync file are:
 ```
 remote_user:root
 remote_machine:dev.example.com
@@ -38,7 +42,7 @@ remote_directory:/tmp/watched_dir
 remote_method:rsync -vrP
 local_ignore: .git ignored_dir
 ```
-we launch the upsync command thusly 
+We launch the upsync command thusly
 
 ```
 $ upsync watched_dir
@@ -65,3 +69,6 @@ source_file_2.src
 sent 95 bytes  received 41 bytes  90.67 bytes/sec
 total size is 12  speedup is 0.09
 ```
+
+
+  
