@@ -5,7 +5,7 @@ in a directory with the correct credentials, watches the directory for
 changes and takes the specified upload action. This script is immature and essentially just a configurable wrapper for `fswatch`. 
 
 # License
-This is licensed under the ["Simplified BSD license"](https://en.wikipedia.org/wiki/BSD_licenses#2-clause_license_.28.22Simplified_BSD_License.22_or_.22FreeBSD_License.22.29) in OSI parlance. 
+Licensed under the ["Simplified BSD license"](https://en.wikipedia.org/wiki/BSD_licenses#2-clause_license_.28.22Simplified_BSD_License.22_or_.22FreeBSD_License.22.29), which is FSF approved, so it should work well with the licensing terms of `fswatch`. Drop me a line if you disagree.
 
 # Version details
 
