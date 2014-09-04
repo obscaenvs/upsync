@@ -44,7 +44,7 @@ Example output:
 ```
 $ upsync watched_dir/
 ++ Uploading file: /Users/fcar/tmp/watched_dir/just_a_dir/source_file_2.src
-   rsync -vrP /Users/fcar/tmp/watched_dir/just_a_dir/source_file_2.src root@dev.bugthunk.net:/tmp/watched_dir/just_a_dir/source_file_2.src
+   rsync -vrP /Users/fcar/tmp/watched_dir/just_a_dir/source_file_2.src root@dev.example.com:/tmp/watched_dir/just_a_dir/source_file_2.src
 sending incremental file list
 source_file_2.src
              12 100%    0.00kB/s    0:00:00 (xfr#1, to-chk=0/1)
