@@ -4,6 +4,9 @@ An [`fswatch`](https://github.com/emcrisostomo/fswatch)-based `bash`-script that
 in a directory with the correct credentials, watches the directory for
 changes and takes the specified upload action.
 
+# Version
+This 
+
 # Example
 Given a directory 
 ```
