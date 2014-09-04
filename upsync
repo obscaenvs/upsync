@@ -1,0 +1,185 @@
+#!/usr/local/bin/bash
+
+####################################################################
+# fetch_setting: get settings for the directory given as # arg.    #
+# The file specifying the settings should be ./.upsync in this dir.#
+####################################################################
+function fetch_setting 
+{
+    local dir=$1;
+    local setting_name=$2;
+    # get settings and format (strip some whitespace)
+    awk -v FS=:  -v sn=${setting_name} '$0 ~ sn {print $2;}' "$dir/.upsync" | sed 's/^ *//g' | sed  's/[[:space:]]\{1,\}/ /g';
+
+}
+export -f fetch_setting;
+
+####################################################################
+# is_skip_file                                                     #
+####################################################################
+function is_skip_file
+{
+    local changed_file_rel=$1;
+    local base_dir=$2;
+    # Change spaces to newlines and escape dots, then check if there's a
+    # match for a directory that should not have its contents uploaded.
+    # Note that we always get a *file* as the leaf node, not a directory,
+    # and that is why we can safely match for directories using '/' as the
+    # ending character.
+    awk -v f=$changed_file_rel  '
+           BEGIN { if (f ~ "#") {print "1"; exit 0;} };
+           f ~ $0 { print $0 };
+           ' < <( echo "${local_ignore[$base_dir]}" |
+           # remove whitespace at the beginning of string
+           sed -e $'s;^[[:space:]]\{1,\};;g' |
+           # remove whitespace on the end of string
+           sed -e $'s;[[:space:]]\{1,\}$;;g' |
+           # change one or more spaces to a single newline
+           sed -e $'s;[[:space:]]\{1,\};\\\n;g' |
+           # escape dots in directory names so they are not interpreted as part
+           # of a regexp
+           sed 's,\.,\\\\.,g' | sed 's,\(.*\)$,\1/,g');
+
+}
+export -f is_skip_file;
+
+####################################################################
+# get_base_dir                                                     #
+####################################################################
+function get_base_dir
+{
+    # we search for a matching base dir in the list of watched dirs.
+    # one and only one should match, given that we abort the whole
+    # script if subdirectories are found. 
+    local filearg=$1;
+    echo -e "${abs_path_dirs_sorted[@]}" | tr " " "\n" | awk -v fa="${filearg}" '
+                 fa ~ $0 {print $0}; ';
+
+}
+export -f get_base_dir;
+
+####################################################################
+# is_parent                                                        #
+# If any of the argument directories is a parent of any of the     #
+# others, abort the script altogether. Because they are sorted on  #
+# the number of characters in the full path for it , a directory   #
+# that occurs early in the array might be a parent of a later one, #
+# but not the other way around.                                    #
+####################################################################
+function is_parent
+{
+  ### is $1 a parent of $2?
+  local potential_parent;
+  potential_parent=$1;
+  # ugly, but it works and is portable, as opposed to the line-noise
+  # sed regexp:s I've tried to concoct just to get the immediate
+  # parent of a directory. The `dirname` command does not work either,
+  # since fully qualified paths are required. Flame me if you will...
+  cd $2/..;
+  immediate_parent=$(pwd -P);
+  cd - >> /dev/null;
+  echo -n "$immediate_parent" | awk -v h=$potential_parent '$0 ~ h {print "1"}; $0 !~ h {print "0"};'
+}
+export -f is_parent;
+
+####################################################################
+# 'main'                                                           #
+####################################################################
+
+
+declare -a abs_path_dirs;
+export abs_path_dirs;
+declare -a abs_path_dirs_sorted;
+export abs_path_dirs_sorted;
+
+# A hack of giant proportions, since any reasonable way to do this
+# doesn't work for all cases in my experience. YMMV.
+for d in $@;
+  do
+    cd $d;
+    abs_path_dirs+=($(pwd)); # automatic array expansion syntax...
+    cd - >> /dev/null;
+  done;
+
+
+# sort the directories to watch - NOT checked for uniqueness, so given
+# the same directory twice, the script will abort.
+# `abs_path_dirs_sorted` is not an array, just a string variable
+dirs_sorted=$(echo -e ${abs_path_dirs[*]} | tr " " "\n" | awk '{ print length, $0 }' | sort -n | cut -d" " -f2- );
+
+# due to a pesky "ambiguous redirect", using a tempfile is the best I
+# can do for the time being. Call me a newbie if you will.
+# REFACTOR: proc subst.
+tmpfile="/tmp/upsync-$$.$RANDOM.tmp";
+echo -e "${dirs_sorted}" | tr " " "\n" > "$tmpfile";
+readarray -t abs_path_dirs_sorted < "$tmpfile";
+rm "$tmpfile";
+
+# loop and check for parenthood -- only need to check to the last but
+# one in the outer loop.
+i=0; # main index
+stop=${#abs_path_dirs_sorted[@]};
+while [ $i -lt $(( $stop - 1 )) ];
+  do
+    testdir=${abs_path_dirs_sorted[$i]};
+    j=$(($i+1));
+    while [ $j -lt $stop ];
+      do
+        testdir2=${abs_path_dirs_sorted[$j]};
+        if [ $(is_parent $testdir $testdir2) == "1" ];
+          then
+            echo -e "Conflicting directory trees: $testdir is a parent of $testdir2." 1>&2
+            exit 1;
+        fi;
+        
+        j=$(($j+1));
+      done; # while
+    i=$(($i+1));
+  done; # while
+
+### Associative array of remote target directories, users, transfer
+### modes and whatnot. Read at start from $dir/.upsync. Arrays can not
+### be exported in bash v < 4.3, so we don't do that.
+declare -A remote_user;
+declare -A remote_machine;
+declare -A remote_directory;
+declare -A remote_method;
+declare -A local_ignore;
+
+# init the above
+for d in ${abs_path_dirs_sorted[@]};
+  do
+    remote_user["$d"]=$(fetch_setting "$d" "remote_user");
+    remote_machine["$d"]=$(fetch_setting "$d" "remote_machine");
+    remote_directory["$d"]=$(fetch_setting "$d" "remote_directory");
+    remote_method["$d"]=$(fetch_setting "$d" "remote_method");
+    local_ignore["$d"]=$(fetch_setting "$d" "local_ignore");
+  done;
+
+
+# echo "ABS: ${abs_path_dirs_sorted[@]}";
+
+# echo -n "is skip: ";
+# tmmmp=$(get_base_dir '/Users/fcar/tmp/watched_dir/just_a_dir/source_file_2.src');
+# echo "BASEDIR:$tmmmp";
+#echo $(is_skip_file '/Users/fcar/tmp/watched_dir/just_a_dir/source_file_2.src' "$tmmmp");
+
+####################################################################
+# The Worker                                                       #
+####################################################################
+
+while read -r changed_file
+do
+    base_dir=$(get_base_dir "$changed_file");
+    # $relname: name of changed file relative to the watched directory
+    relname=$(echo ${changed_file} | sed "s,${base_dir},,g");
+    # echo -e "Changes detected in $relname in $base_dir.";
+    if [ $(is_skip_file "$relname" "$base_dir") ]; then
+        echo "-- Skipping file $changed_file";
+    else 
+        echo -e "++ Uploading file: ${changed_file}";
+        echo -e "   ${remote_method[${base_dir}]} ${changed_file} ${remote_user[${base_dir}]}@${remote_machine[${base_dir}]}:${remote_directory[${base_dir}]}${relname}";
+        bash -c "   ${remote_method[${base_dir}]} ${changed_file} ${remote_user[${base_dir}]}@${remote_machine[${base_dir}]}:${remote_directory[${base_dir}]}${relname}";
+    fi;
+done < <(fswatch "${abs_path_dirs_sorted[@]}");
+
