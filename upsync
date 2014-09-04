@@ -21,14 +21,16 @@ function is_skip_file
 {
     local changed_file_rel=$1;
     local base_dir=$2;
+
     # Change spaces to newlines and escape dots, then check if there's a
     # match for a directory that should not have its contents uploaded.
     # Note that we always get a *file* as the leaf node, not a directory,
     # and that is why we can safely match for directories using '/' as the
     # ending character.
+
     awk -v f=$changed_file_rel  '
-           BEGIN { if (f ~ "#") {print "1"; exit 0;} };
-           f ~ $0 { print $0 };
+           BEGIN { if (f ~ "#") {print "1"; exit 0; } };
+           f ~ $0 { print "1"; exit 0; };
            ' < <( echo "${local_ignore[$base_dir]}" |
            # remove whitespace at the beginning of string
            sed -e $'s;^[[:space:]]\{1,\};;g' |
@@ -38,7 +40,7 @@ function is_skip_file
            sed -e $'s;[[:space:]]\{1,\};\\\n;g' |
            # escape dots in directory names so they are not interpreted as part
            # of a regexp
-           sed 's,\.,\\\\.,g' | sed 's,\(.*\)$,\1/,g');
+           sed 's,\.,\\.,g' | sed 's,\(.*\)$,\1/,g');
 
 }
 export -f is_skip_file;
@@ -109,7 +111,7 @@ dirs_sorted=$(echo -e ${abs_path_dirs[*]} | tr " " "\n" | awk '{ print length, $
 
 # due to a pesky "ambiguous redirect", using a tempfile is the best I
 # can do for the time being. Call me a newbie if you will.
-# REFACTOR: proc subst.
+# REFACTOR: process substitution!
 tmpfile="/tmp/upsync-$$.$RANDOM.tmp";
 echo -e "${dirs_sorted}" | tr " " "\n" > "$tmpfile";
 readarray -t abs_path_dirs_sorted < "$tmpfile";
@@ -156,13 +158,6 @@ for d in ${abs_path_dirs_sorted[@]};
     local_ignore["$d"]=$(fetch_setting "$d" "local_ignore");
   done;
 
-
-# echo "ABS: ${abs_path_dirs_sorted[@]}";
-
-# echo -n "is skip: ";
-# tmmmp=$(get_base_dir '/Users/fcar/tmp/watched_dir/just_a_dir/source_file_2.src');
-# echo "BASEDIR:$tmmmp";
-#echo $(is_skip_file '/Users/fcar/tmp/watched_dir/just_a_dir/source_file_2.src' "$tmmmp");
 
 ####################################################################
 # The Worker                                                       #
