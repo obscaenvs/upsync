@@ -1,6 +1,6 @@
 # `upsync`
 
-An `fswatch`-based `bash`-script that, based on a dot file `.upsync`
+An [`fswatch`](https://github.com/emcrisostomo/fswatch)-based `bash`-script that, based on a dot file `.upsync`
 in a directory with the correct credentials, watches the directory for
 changes and takes the specified upload action.
 
