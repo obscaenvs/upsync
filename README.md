@@ -11,7 +11,10 @@ This version of `upsync` works with `fswatch-1.3.9` and
 somewhat older versions. As of now, only tested on Mac OS X 10.8 and FreeBSD 10.0-RELEASE. 
 
 # Bugs
-Probably, being written in `bash`. Let me know. 
+
+Sometimes it's slow to react to a change. I have yet to investigate
+why. I don't think it is the underlying program (i.e.`fswatch`)
+Probably more, being written in `bash`. Let me know.
 
 # Example
 Given a directory 
