@@ -16,9 +16,7 @@ somewhat older versions. As of now, only tested on Mac OS X
 Testing under way on FreeBSD 10.0-RELEASE.
 
 # Known issues
-
-Sometimes it's slow to react to a change. I have yet to investigate
-why. I don't think it is the underlying program (i.e.`fswatch`).
+None, but neither does it have a great many features.
 
 # Todo
   * Better error messages (e.g. when starting the script)
